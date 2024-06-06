@@ -1,2 +1,3 @@
-# python-dummy-project
-simple python project for hackathon 06 2024
+# action-python-split
+
+Composite action to split pytest execution with a job matrix
