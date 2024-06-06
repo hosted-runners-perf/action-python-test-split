@@ -1,0 +1,53 @@
+name: 'Python test split'
+description: 'Split tests to be run in multiple jobs'
+inputs:
+  groups:  # id of input
+    description: 'Number of test groups'
+    required: true
+    default: 2
+outputs:
+  outputmatrix:
+    description: 'Matrix output for running the tests'
+    value: ${{ steps.set-matrix.outputs.outputmatrix }}
+runs:
+  using: "composite"
+  steps:
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Write Inputs
+        run: echo ${{ inputs.groups }}
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python ./script/split_tests.py ${{ inputs.groups }} tests
+      - name: Upload pytest_buckets
+        uses: actions/upload-artifact@v4.3.3
+        with:
+          name: pytest_buckets
+          path: pytest_buckets.txt
+          overwrite: true
+      - uses: actions/github-script@v7
+        id: set-matrix
+        env:
+          GROUPS: ${{ inputs.groups }}
+        with:
+          script: |
+            const generatedMatrix = []
+            const  GROUPS = process.env.GROUPS
+            console.log("groups")
+            console.log( GROUPS )
+            let MaxGroups = Number(GROUPS) + 1
+            console.log(MaxGroups)
+
+            for (let i = 1; i < MaxGroups; i++) {
+              console.log(i)
+              generatedMatrix.push({
+                group: i
+              })
+            }
+
+            console.log(generatedMatrix)
+            core.setOutput('outputmatrix', { 'include': generatedMatrix })
