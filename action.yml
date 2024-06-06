@@ -17,8 +17,10 @@ runs:
         with:
           python-version: 3.9
       - name: Write Inputs
+        shell: bash
         run: echo ${{ inputs.groups }}
       - name: Install deps
+        shell: bash
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
